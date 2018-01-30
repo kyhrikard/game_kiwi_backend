@@ -8,6 +8,8 @@ const client = new Client({
     ssl: true
 })
 
+app.use(bodyParser.urlencoded({ extended: true }))
+
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
 })
@@ -28,5 +30,43 @@ app.get('/nests', (request, response) => {
             console.log(err)
         else
             response.json(res.rows)
+    })
+})
+
+app.get('/nests/:id', (request, response) => {
+    const text = 'SELECT * FROM nests WHERE id=$1'
+    const values = [request.params.id]
+
+    client.query(text, values, (err, res) => {
+        if (err)
+            console.log(err)
+        else
+            response.json(res.rows)
+    })
+})
+
+app.post('/nests', (request, response) => {
+    const text = 'INSERT INTO nests(id, name, lat, lng) VALUES($1, $2, $3, $4)'
+    const values = [request.body.id, request.body.name, request.body.lat, request.body.lng]
+
+    client.query(text, values, (err, res) => {
+        if (err) {
+            console.log(err.stack)
+        } else {
+            response.json('Added to db')
+        }
+    })
+})
+
+app.put('/nests', (request, response) => {
+    const text = 'UPDATE nests SET name=$2, lat=$3, lng=$4  WHERE id=$1'
+    const values = [request.body.id, request.body.name, request.body.lat, request.body.lng]
+
+    client.query(text, values, (err, res) => {
+        if (err) {
+            console.log(err.stack)
+        } else {
+            response.json('DB updated')
+        }
     })
 })

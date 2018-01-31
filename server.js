@@ -25,7 +25,7 @@ app.get('/', (request, response) => {
 client.connect();
 
 app.get('/nests', (request, response) => {
-    client.query('SELECT * FROM nests', (err, res) => {
+    client.query('SELECT * FROM nest', (err, res) => {
         if (err)
             console.log(err)
         else
@@ -34,7 +34,7 @@ app.get('/nests', (request, response) => {
 })
 
 app.get('/nests/:id', (request, response) => {
-    const text = 'SELECT * FROM nests WHERE id=$1'
+    const text = 'SELECT * FROM nest WHERE id=$1'
     const values = [request.params.id]
 
     client.query(text, values, (err, res) => {
@@ -46,7 +46,7 @@ app.get('/nests/:id', (request, response) => {
 })
 
 app.post('/nests', (request, response) => {
-    const text = 'INSERT INTO nests(id, name, lat, lng) VALUES($1, $2, $3, $4)'
+    const text = 'INSERT INTO nest(id, name, lat, lng) VALUES($1, $2, $3, $4)'
     const values = [request.body.id, request.body.name, request.body.lat, request.body.lng]
 
     client.query(text, values, (err, res) => {
@@ -59,7 +59,7 @@ app.post('/nests', (request, response) => {
 })
 
 app.put('/nests', (request, response) => {
-    const text = 'UPDATE nests SET name=$2, lat=$3, lng=$4  WHERE id=$1'
+    const text = 'UPDATE nest SET name=$2, lat=$3, lng=$4  WHERE id=$1'
     const values = [request.body.id, request.body.name, request.body.lat, request.body.lng]
 
     client.query(text, values, (err, res) => {

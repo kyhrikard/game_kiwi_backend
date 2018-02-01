@@ -15,10 +15,14 @@ app.listen(port, () => {
 })
 
 app.get('/', (request, response) => {
-    response.write('<h1>This is the dev Nestr backend</h1>')
-    response.write('<h2>This is the dev Nestr backend</h2>')
-    response.write('<p>This is the dev Nestr backend</p>')
-    response.write('<p>Here we are building our web API</p>')
+    response.write('<h1>Availiable endpoints at the Nestr Dev Backend</h1>')
+    app._router.stack.forEach(function (r) {
+        if (typeof r.route != 'undefined') {
+            if (r.route.path !== '/')
+                if (typeof r.route.path !== 'undefined')
+                    response.write(`<h1>${r.route.path}</h1>`)
+        }
+    })
     response.end()
 })
 
@@ -82,3 +86,7 @@ app.get('/api/players', (request, response) => {
             response.json(res.rows)
     })
 })
+
+console.log(
+
+)

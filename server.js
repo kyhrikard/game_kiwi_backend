@@ -58,9 +58,9 @@ app.post('/api/nests', (request, response) => {
     })
 })
 
-app.put('/api/nests', (request, response) => {
+app.put('/api/nests/:id', (request, response) => {
     const text = 'UPDATE nest SET name=$2, latitude=$3, longitude=$4  WHERE id=$1'
-    const values = [request.body.id, request.body.name, request.body.latitude, request.body.longitude]
+    const values = [request.params.id, request.body.name, request.body.latitude, request.body.longitude]
 
     client.query(text, values, (err, res) => {
         if (err) {
@@ -68,5 +68,17 @@ app.put('/api/nests', (request, response) => {
         } else {
             response.json('DB updated')
         }
+    })
+})
+
+// Get players
+app.get('/api/players', (request, response) => {
+    const text = 'SELECT * FROM player'
+
+    client.query(text, (err, res) => {
+        if (err)
+            console.log(err)
+        else
+            response.json(res.rows)
     })
 })

@@ -46,8 +46,8 @@ app.get('/api/nests/:id', (request, response) => {
 })
 
 app.post('/api/nests', (request, response) => {
-    const text = 'INSERT INTO nest(id, name, lat, lng) VALUES($1, $2, $3, $4)'
-    const values = [request.body.id, request.body.name, request.body.lat, request.body.lng]
+    const text = 'INSERT INTO nest(name, latitude, longitude) VALUES($1, $2, $3)'
+    const values = [request.body.name, request.body.latitude, request.body.longitude]
 
     client.query(text, values, (err, res) => {
         if (err) {
@@ -59,8 +59,8 @@ app.post('/api/nests', (request, response) => {
 })
 
 app.put('/api/nests', (request, response) => {
-    const text = 'UPDATE nest SET name=$2, lat=$3, lng=$4  WHERE id=$1'
-    const values = [request.body.id, request.body.name, request.body.lat, request.body.lng]
+    const text = 'UPDATE nest SET name=$2, latitude=$3, longitude=$4  WHERE id=$1'
+    const values = [request.body.id, request.body.name, request.body.latitude, request.body.longitude]
 
     client.query(text, values, (err, res) => {
         if (err) {

@@ -18,9 +18,9 @@ app.get('/', (request, response) => {
     response.write('<h1>Availiable endpoints at the Nestr Dev Backend</h1>')
     app._router.stack.forEach(function (r) {
         if (typeof r.route != 'undefined') {
-            if (r.route.path !== '/')
-                if (typeof r.route.path !== 'undefined')
-                    response.write(`<h1>${r.route.path}</h1>`)
+            if (r.route.path !== '/'){
+                response.write(`<h1>${r.route.path} -- ${r.route.stack[0].method}</h1>`)
+            }
         }
     })
     response.end()
@@ -28,6 +28,7 @@ app.get('/', (request, response) => {
 
 client.connect();
 
+// Get all nests
 app.get('/api/nests', (request, response) => {
     client.query('SELECT * FROM nest', (err, res) => {
         if (err)
@@ -37,6 +38,7 @@ app.get('/api/nests', (request, response) => {
     })
 })
 
+// Get nest
 app.get('/api/nests/:id', (request, response) => {
     const text = 'SELECT * FROM nest WHERE id=$1'
     const values = [request.params.id]
@@ -49,6 +51,7 @@ app.get('/api/nests/:id', (request, response) => {
     })
 })
 
+// Create nest
 app.post('/api/nests', (request, response) => {
     const text = 'INSERT INTO nest(name, latitude, longitude) VALUES($1, $2, $3)'
     const values = [request.body.name, request.body.latitude, request.body.longitude]
@@ -62,8 +65,9 @@ app.post('/api/nests', (request, response) => {
     })
 })
 
+// Update nest
 app.put('/api/nests/:id', (request, response) => {
-    const text = 'UPDATE nest SET name=$2, latitude=$3, longitude=$4  WHERE id=$1'
+    const text = 'UPDATE nest SET name = COALESCE($2, name), latitude = COALESCE($3, latitude), longitude = COALESCE($4, longitude) WHERE id=$1'
     const values = [request.params.id, request.body.name, request.body.latitude, request.body.longitude]
 
     client.query(text, values, (err, res) => {
@@ -87,6 +91,17 @@ app.get('/api/players', (request, response) => {
     })
 })
 
-console.log(
+// Create player
+app.post('/api/players', (request, response) => {
+    const text = 'INSERT INTO player(username, password, teamid) VALUES($1, $2, $3)'
+    const values = [request.body.username, request.body.password, request.body.teamid]
 
-)
+    client.query(text, values, (err, res) => {
+        if (err) {
+            console.log(err.stack)
+        } else {
+            response.json('Player created')
+        }
+    })
+
+})

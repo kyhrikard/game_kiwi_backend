@@ -10,7 +10,7 @@ const client = new Client({
 })
 
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cors)
+app.use(cors())
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)

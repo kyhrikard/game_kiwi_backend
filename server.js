@@ -18,7 +18,7 @@ app.get('/', (request, response) => {
     response.write('<h1>Availiable endpoints at the Nestr Dev Backend</h1>')
     app._router.stack.forEach(function (r) {
         if (typeof r.route != 'undefined') {
-            if (r.route.path !== '/'){
+            if (r.route.path !== '/') {
                 response.write(`<h1>${r.route.path} -- ${r.route.stack[0].method}</h1>`)
             }
         }
@@ -31,8 +31,10 @@ client.connect();
 // Get all nests
 app.get('/api/nests', (request, response) => {
     client.query('SELECT * FROM nest', (err, res) => {
-        if (err)
-            console.log(err)
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
         else
             response.json(res.rows)
     })
@@ -44,8 +46,10 @@ app.get('/api/nests/:id', (request, response) => {
     const values = [request.params.id]
 
     client.query(text, values, (err, res) => {
-        if (err)
-            console.log(err)
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
         else
             response.json(res.rows)
     })
@@ -58,9 +62,11 @@ app.post('/api/nests', (request, response) => {
 
     client.query(text, values, (err, res) => {
         if (err) {
-            console.log(err.stack)
+            response.status(400)
+            response.json(err.detail)
         } else {
-            response.json('Added to db')
+            response.status(200)
+            response.json('Nest created')
         }
     })
 })
@@ -70,13 +76,30 @@ app.put('/api/nests/:id', (request, response) => {
     const text = 'UPDATE nest SET name = COALESCE($2, name), latitude = COALESCE($3, latitude), longitude = COALESCE($4, longitude) WHERE id=$1'
     const values = [request.params.id, request.body.name, request.body.latitude, request.body.longitude]
 
-    client.query(text, values, (err, res) => {
-        if (err) {
-            console.log(err.stack)
-        } else {
-            response.json('DB updated')
-        }
-    })
+    let emptyRequest = true
+
+    for (let index = 1; index < values.length; index++) {
+        console.log(values[index])
+        if (typeof values[index] !== 'undefined')
+            emptyRequest = false
+    }
+
+    if (emptyRequest) {
+        response.status(400)
+        response.json('Your request is empty')
+    }
+    else {
+        client.query(text, values, (err, res) => {
+            if (err) {
+                response.status(400)
+                response.json(err.detail)
+            } else {
+                response.status(200)
+                response.json('Nest updated')
+            }
+        })
+    }
+
 })
 
 // Get players
@@ -84,10 +107,14 @@ app.get('/api/players', (request, response) => {
     const text = 'SELECT * FROM player'
 
     client.query(text, (err, res) => {
-        if (err)
-            console.log(err)
-        else
+        if (err) {
+            esponse.status(400)
+            response.json('Error getting players')
+        }
+        else {
+            response.status(200)
             response.json(res.rows)
+        }
     })
 })
 
@@ -98,8 +125,10 @@ app.post('/api/players', (request, response) => {
 
     client.query(text, values, (err, res) => {
         if (err) {
-            console.log(err.stack)
+            response.status(400)
+            response.json(err.detail)
         } else {
+            response.status(201)
             response.json('Player created')
         }
     })

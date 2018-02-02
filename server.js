@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 5000
 const bodyParser = require('body-parser')
@@ -9,6 +10,7 @@ const client = new Client({
 })
 
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)

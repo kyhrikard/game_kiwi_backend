@@ -124,8 +124,8 @@ app.get('/api/players', (request, response) => {
 
 // Create player
 app.post('/api/players', (request, response) => {
-    const text = 'INSERT INTO player(username, password, teamid) VALUES($1, $2, $3)'
-    const values = [request.body.username, request.body.password, request.body.teamid]
+    const text = 'INSERT INTO player(username, password, teamid, email) VALUES($1, $2, $3, $4)'
+    const values = [request.body.username, request.body.password, request.body.teamid, request.body.email]
 
     //Check if request contains empty fields
     let emptyRequestFields = false

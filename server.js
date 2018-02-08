@@ -112,7 +112,7 @@ app.get('/api/players', (request, response) => {
 
     client.query(text, (err, res) => {
         if (err) {
-            esponse.status(400)
+            response.status(400)
             response.json('Error getting players')
         }
         else {
@@ -151,5 +151,19 @@ app.post('/api/players', (request, response) => {
             }
         })
     }
+})
+
+app.delete('/api/players/:id', (request, response) => {
+    const text = 'DELETE FROM player WHERE id=$1'
+    const values = [request.params.id]
+
+    client.query(text, values, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
+        else
+            response.json(`User DELETED`)
+    })
 
 })

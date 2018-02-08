@@ -169,7 +169,7 @@ app.delete('/api/players/:id', (request, response) => {
 
 app.get('/api/topplayers', (request, response) => {
     const text =
-        `SELECT p.id, p.username, t.name as team, COUNT(*) as Totalneststaken 
+        `SELECT p.id, p.username, t.name as team, COUNT(*) as totalneststaken 
         FROM playertimestampnest ptsn, player p, team t 
         WHERE ptsn.playerid = p.id 
         AND p.teamid = t.id
@@ -190,16 +190,13 @@ app.get('/api/topplayers', (request, response) => {
 
 app.get('/api/currentteamscore', (request, response) => {
     const text =
-        `SELECT name, COUNT(name) as currentscore 
+        `SELECT name, COUNT(name) as currentscore
         FROM
-            (SELECT playerid, test.nestid, timestamp FROM 
-                (SELECT nestid, MAX(timestamp) 
-                FROM playertimestampnest
-                GROUP BY nestid) as test
-            LEFT OUTER JOIN playertimestampnest
-            ON test.max = playertimestampnest.timestamp) as result, player, team
-        WHERE result.playerid = player.id
-        AND player.teamid = team.id
+            (SELECT DISTINCT ON (nestid) nestid, timestamp, name
+            FROM playertimestampnest, player, team
+            WHERE playertimestampnest.playerid = player.id
+            AND player.teamid = team.id
+            ORDER BY nestid, timestamp DESC) AS result
         GROUP BY name`
 
     client.query(text, (err, res) => {

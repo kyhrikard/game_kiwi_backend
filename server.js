@@ -165,5 +165,24 @@ app.delete('/api/players/:id', (request, response) => {
         else
             response.json(`User DELETED`)
     })
+})
 
+app.get('/api/topplayers', (request, response) => {
+    const text =    'SELECT p.username, t.name as team, COUNT(*) as Totalneststaken ' +
+                    'FROM playertimestampnest ptsn, player p, team t ' +
+                    'WHERE ptsn.playerid = p.id ' +
+                    'AND p.teamid = t.id ' + 
+                    'GROUP BY (p.username, t.name) ' +
+                    'ORDER BY totalneststaken DESC'
+
+    client.query(text, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json('Error getting timestamps')
+        }
+        else {
+            response.status(200)
+            response.json(res.rows)
+        }
+    })
 })

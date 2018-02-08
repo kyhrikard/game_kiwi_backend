@@ -186,3 +186,24 @@ app.get('/api/topplayers', (request, response) => {
         }
     })
 })
+
+app.get('/api/currentteamscore', (request, response) => {
+    const text =    'SELECT name, COUNT(name) as currentscore FROM ' +
+                    '(SELECT playerid, MAX(timestamp) ' +
+                    'FROM playertimestampnest ' +
+                    'GROUP BY (playerid)) AS test, player, team ' +
+                    'WHERE test.playerid = player.id ' +
+                    'AND player.teamid = team.id ' +
+                    'GROUP BY name ' 
+
+    client.query(text, (err, res) => {
+        if (err) {
+                response.status(400)
+                response.json('Error getting score')
+            }
+            else {
+                response.status(200)
+                response.json(res.rows)
+            }
+    })                   
+})

@@ -142,7 +142,7 @@ app.put('/api/nests/:id', (request, response) => {
 // Get players
 app.get('/api/players', (request, response) => {
     const text = `
-        SELECT player.id, username, password, teamid, email, name as teamname
+        SELECT player.id, username, password, email, teamid, name as teamname
         FROM player, team
         WHERE player.teamid = team.id
         ORDER BY player.id DESC`
@@ -162,9 +162,10 @@ app.get('/api/players', (request, response) => {
 // Get player
 app.get('/api/players/:id', (request, response) => {
     const text = `
-    SELECT * 
-    FROM player 
-    WHERE id=$1`
+        SELECT player.id, username, password, email, teamid, name as teamname
+        FROM player, team
+        WHERE player.teamid = team.id
+        AND player.id = $1`
 
     const values = [request.params.id]
 

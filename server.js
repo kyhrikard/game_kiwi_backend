@@ -85,8 +85,8 @@ app.get('/api/nests/:id', (request, response) => {
 // Create nest
 app.post('/api/nests', (request, response) => {
     const text = `
-    INSERT INTO nest(name, latitude, longitude) 
-    VALUES($1, $2, $3)`
+        INSERT INTO nest(name, latitude, longitude) 
+        VALUES($1, $2, $3)`
 
     const values = [request.body.name, request.body.latitude, request.body.longitude]
 
@@ -104,11 +104,11 @@ app.post('/api/nests', (request, response) => {
 // Update nest
 app.put('/api/nests/:id', (request, response) => {
     const text = `
-    UPDATE nest 
-    SET name = COALESCE($2, name), 
-    latitude = COALESCE($3, latitude), 
-    longitude = COALESCE($4, longitude) 
-    WHERE id=$1`
+        UPDATE nest 
+        SET name = COALESCE($2, name), 
+        latitude = COALESCE($3, latitude), 
+        longitude = COALESCE($4, longitude) 
+        WHERE id=$1`
 
     const values = [request.params.id, request.body.name, request.body.latitude, request.body.longitude]
 
@@ -142,9 +142,10 @@ app.put('/api/nests/:id', (request, response) => {
 // Get players
 app.get('/api/players', (request, response) => {
     const text = `
-    SELECT * 
-    FROM player 
-    ORDER BY id DESC`
+        SELECT player.id, username, password, teamid, email, name as teamname
+        FROM player, team
+        WHERE player.teamid = team.id
+        ORDER BY player.id DESC`
 
     client.query(text, (err, res) => {
         if (err) {

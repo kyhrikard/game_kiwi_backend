@@ -22,7 +22,7 @@ app.get('/', (request, response) => {
     app._router.stack.forEach(function (r) {
         if (typeof r.route != 'undefined') {
             if (r.route.path !== '/') {
-                response.write(`<h1>${r.route.path} -- ${r.route.stack[0].method}</h1>`)
+                response.write(`<h2>${r.route.path} -- ${r.route.stack[0].method}</h2>`)
             }
         }
     })
@@ -31,9 +31,21 @@ app.get('/', (request, response) => {
 
 client.connect();
 
-// Get all nests
+// Get all nests and which team owns it
 app.get('/api/nests', (request, response) => {
-    client.query('SELECT * FROM nest', (err, res) => {
+    const text = `
+    SELECT id, nest.name as nestname, latitude, longitude, result.name as inhabitatedby
+    FROM nest
+    LEFT OUTER JOIN
+        (SELECT DISTINCT ON (nestid) nestid, timestamp, name
+	    FROM playertimestampnest, player, team
+	    WHERE playertimestampnest.playerid = player.id
+	    AND player.teamid = team.id
+	    ORDER BY nestid, timestamp DESC) AS result
+    ON nest.id = result.nestid
+    ORDER BY id DESC`
+
+    client.query(text, (err, res) => {
         if (err) {
             response.status(400)
             response.json(err.detail)
@@ -45,7 +57,19 @@ app.get('/api/nests', (request, response) => {
 
 // Get nest
 app.get('/api/nests/:id', (request, response) => {
-    const text = 'SELECT * FROM nest WHERE id=$1'
+    const text = `
+    SELECT id, nest.name as nestname, latitude, longitude, result.name as inhabitatedby
+    FROM nest
+    LEFT OUTER JOIN
+        (SELECT DISTINCT ON (nestid) nestid, timestamp, name
+	    FROM playertimestampnest, player, team
+	    WHERE playertimestampnest.playerid = player.id
+	    AND player.teamid = team.id
+	    ORDER BY nestid, timestamp DESC) AS result
+    ON nest.id = result.nestid
+    WHERE id = $1
+    ORDER BY id DESC`
+
     const values = [request.params.id]
 
     client.query(text, values, (err, res) => {
@@ -60,7 +84,10 @@ app.get('/api/nests/:id', (request, response) => {
 
 // Create nest
 app.post('/api/nests', (request, response) => {
-    const text = 'INSERT INTO nest(name, latitude, longitude) VALUES($1, $2, $3)'
+    const text = `
+    INSERT INTO nest(name, latitude, longitude) 
+    VALUES($1, $2, $3)`
+
     const values = [request.body.name, request.body.latitude, request.body.longitude]
 
     client.query(text, values, (err, res) => {
@@ -76,7 +103,13 @@ app.post('/api/nests', (request, response) => {
 
 // Update nest
 app.put('/api/nests/:id', (request, response) => {
-    const text = 'UPDATE nest SET name = COALESCE($2, name), latitude = COALESCE($3, latitude), longitude = COALESCE($4, longitude) WHERE id=$1'
+    const text = `
+    UPDATE nest 
+    SET name = COALESCE($2, name), 
+    latitude = COALESCE($3, latitude), 
+    longitude = COALESCE($4, longitude) 
+    WHERE id=$1`
+
     const values = [request.params.id, request.body.name, request.body.latitude, request.body.longitude]
 
     // Check if request is empty
@@ -108,7 +141,10 @@ app.put('/api/nests/:id', (request, response) => {
 
 // Get players
 app.get('/api/players', (request, response) => {
-    const text = 'SELECT * FROM player'
+    const text = `
+    SELECT * 
+    FROM player 
+    ORDER BY id DESC`
 
     client.query(text, (err, res) => {
         if (err) {
@@ -122,9 +158,31 @@ app.get('/api/players', (request, response) => {
     })
 })
 
+// Get player
+app.get('/api/players/:id', (request, response) => {
+    const text = `
+    SELECT * 
+    FROM player 
+    WHERE id=$1`
+
+    const values = [request.params.id]
+
+    client.query(text, values, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
+        else
+            response.json(res.rows)
+    })
+})
+
 // Create player
 app.post('/api/players', (request, response) => {
-    const text = 'INSERT INTO player(username, password, teamid, email) VALUES($1, $2, $3, $4)'
+    const text = `
+        INSERT INTO player(username, password, teamid, email) 
+        VALUES($1, $2, $3, $4)`
+
     const values = [request.body.username, request.body.password, request.body.teamid, request.body.email]
 
     //Check if request contains empty fields
@@ -147,14 +205,18 @@ app.post('/api/players', (request, response) => {
                 response.json(err.detail)
             } else {
                 response.status(201)
-                response.json('Player created')
+                response.json(`Player ${request.body.username} created`)
             }
         })
     }
 })
 
+// Delete player
 app.delete('/api/players/:id', (request, response) => {
-    const text = 'DELETE FROM player WHERE id=$1'
+    const text = `
+        DELETE FROM player 
+        WHERE id=$1`
+
     const values = [request.params.id]
 
     client.query(text, values, (err, res) => {
@@ -163,13 +225,14 @@ app.delete('/api/players/:id', (request, response) => {
             response.json(err.detail)
         }
         else
-            response.json(`User DELETED`)
+            response.json(res.rows)
     })
 })
 
+// Get the top nest snatchers
 app.get('/api/topplayers', (request, response) => {
-    const text =
-        `SELECT p.id, p.username, t.name as team, COUNT(*) as totalneststaken 
+    const text =`
+        SELECT p.id, p.username, t.name as team, COUNT(*) as totalneststaken 
         FROM playertimestampnest ptsn, player p, team t 
         WHERE ptsn.playerid = p.id 
         AND p.teamid = t.id
@@ -188,9 +251,10 @@ app.get('/api/topplayers', (request, response) => {
     })
 })
 
+// Get the current amount of nest owned right now
 app.get('/api/currentteamscore', (request, response) => {
-    const text =
-        `SELECT name, COUNT(name) as currentscore
+    const text =`
+        SELECT name, COUNT(name) as currentscore
         FROM
             (SELECT DISTINCT ON (nestid) nestid, timestamp, name
             FROM playertimestampnest, player, team

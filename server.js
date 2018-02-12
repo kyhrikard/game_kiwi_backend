@@ -276,3 +276,39 @@ app.get('/api/currentteamscore', (request, response) => {
         }
     })
 })
+
+// Add timestamp
+app.post('/api/playertimestampnest', (request, response) => {
+    const text =`
+    INSERT INTO playertimestampnest(playerid, nestid, timestamp)
+    VALUES ($1, $2, $3)`
+
+    const values = [request.body.playerid, request.body.nestid, request.body.timestamp]
+
+    client.query(text, values, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        } else {
+            response.status(201)
+            response.json(`Timestamp added`)
+        }
+    })
+})
+
+// Get timestamp
+app.get('/api/playertimestampnest', (request, response) => {
+    const text = `
+    SELECT * 
+    FROM playertimestampnest
+    ORDER BY timestamp DESC`
+
+    client.query(text, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
+        else
+            response.json(res.rows)
+    })
+})

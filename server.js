@@ -34,10 +34,10 @@ client.connect();
 // Get all nests and which team owns it
 app.get('/api/nests', (request, response) => {
     const text = `
-    SELECT id, nest.name as name, latitude, longitude, result.name as inhabitedby
+    SELECT id, nest.name as name, latitude, longitude, result.name as inhabitedby, result.username as latestsnatcher, result.timestamp as snatchtimestamp
     FROM nest
     LEFT OUTER JOIN
-        (SELECT DISTINCT ON (nestid) nestid, timestamp, name
+        (SELECT DISTINCT ON (nestid) nestid, timestamp, name, player.username
 	    FROM playertimestampnest, player, team
 	    WHERE playertimestampnest.playerid = player.id
 	    AND player.teamid = team.id
@@ -58,10 +58,10 @@ app.get('/api/nests', (request, response) => {
 // Get nest
 app.get('/api/nests/:id', (request, response) => {
     const text = `
-    SELECT id, nest.name as name, latitude, longitude, result.name as inhabitedby
+    SELECT id, nest.name as name, latitude, longitude, result.name as inhabitedby, result.username as latestsnatcher, result.timestamp as snatchtimestamp
     FROM nest
     LEFT OUTER JOIN
-        (SELECT DISTINCT ON (nestid) nestid, timestamp, name
+        (SELECT DISTINCT ON (nestid) nestid, timestamp, name, player.username
 	    FROM playertimestampnest, player, team
 	    WHERE playertimestampnest.playerid = player.id
 	    AND player.teamid = team.id

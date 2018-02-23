@@ -297,7 +297,24 @@ app.post('/api/playertimestampnest', (request, response) => {
 })
 
 // Get timestamp
-app.get('/api/playertimestampnest/latest', (request, response) => {
+app.get('/api/playertimestampnests', (request, response) => {
+    const text = `
+    SELECT *
+    FROM playertimestampnest
+    ORDER BY timestamp DESC`
+
+    client.query(text, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
+        else
+            response.json(res.rows)
+    })
+})
+
+// Get timestamp
+app.get('/api/playertimestampnests/latest', (request, response) => {
     const text = `
     SELECT timestamp
     FROM playertimestampnest

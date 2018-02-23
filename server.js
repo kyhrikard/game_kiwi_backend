@@ -278,7 +278,7 @@ app.get('/api/currentteamscore', (request, response) => {
 })
 
 // Add timestamp
-app.post('/api/playertimestampnest', (request, response) => {
+app.post('/api/playertimestampnests', (request, response) => {
     const text =`
     INSERT INTO playertimestampnest(playerid, nestid, timestamp)
     VALUES ($1, $2, $3)`

@@ -350,3 +350,25 @@ app.get('/api/playertimestampnests/latest', (request, response) => {
     })
 })
 
+// Get snatch history
+app.get('/api/snatchhistory', (request, response) => {
+    const text = `
+    SELECT username, nest.name as nestname, timestamp, team.name as teamname
+    FROM playertimestampnest, player, nest, team    
+    WHERE playertimestampnest.playerid = player.id
+    AND playertimestampnest.nestid = nest.id
+    AND player.teamid = team.id
+    ORDER BY timestamp DESC`
+
+    client.query(text, (err, res) => {
+        if (err) {
+            response.status(400)
+            response.json(err.detail)
+        }
+        else
+            response.json(res.rows)
+    })
+})
+
+
+

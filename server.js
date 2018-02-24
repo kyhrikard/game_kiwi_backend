@@ -142,10 +142,17 @@ app.put('/api/nests/:id', (request, response) => {
 // Get players
 app.get('/api/players', (request, response) => {
     const text = `
-        SELECT player.id, username, password, email, teamid, name as teamname
-        FROM player, team
-        WHERE player.teamid = team.id
-        ORDER BY player.id DESC`
+    SELECT player.id, player.username, player.password, player.email, result.team as teamname, result.totalneststaken
+    FROM player
+    LEFT OUTER JOIN
+        (SELECT p.id, p.username, t.name as team, COUNT(*) as totalneststaken 
+         FROM playertimestampnest ptsn, player p, team t 
+         WHERE ptsn.playerid = p.id 
+         AND p.teamid = t.id
+         GROUP BY (p.username, t.name, p.id)
+         ORDER BY totalneststaken DESC) AS result
+    ON player.id = result.id
+    ORDER BY player.id DESC`
 
     client.query(text, (err, res) => {
         if (err) {
@@ -162,10 +169,17 @@ app.get('/api/players', (request, response) => {
 // Get player
 app.get('/api/players/:id', (request, response) => {
     const text = `
-        SELECT player.id, username, password, email, teamid, name as teamname
-        FROM player, team
-        WHERE player.teamid = team.id
-        AND player.id = $1`
+    SELECT player.id, player.username, player.password, player.email, result.team as teamname, result.totalneststaken
+    FROM player
+    LEFT OUTER JOIN
+        (SELECT p.id, p.username, t.name as team, COUNT(*) as totalneststaken 
+         FROM playertimestampnest ptsn, player p, team t 
+         WHERE ptsn.playerid = p.id 
+         AND p.teamid = t.id
+         GROUP BY (p.username, t.name, p.id)
+         ORDER BY totalneststaken DESC) AS result
+    ON player.id = result.id
+    WHERE player.id = $1`
 
     const values = [request.params.id]
 

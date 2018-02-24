@@ -139,7 +139,7 @@ app.put('/api/nests/:id', (request, response) => {
 
 })
 
-// Get players
+// Get the players and their current score
 app.get('/api/players', (request, response) => {
     const text = `
     SELECT result2.id, result2.username, result2.password, result2.email, team.name as teamname, result2.totalneststaken
@@ -168,7 +168,7 @@ app.get('/api/players', (request, response) => {
     })
 })
 
-// Get player
+// Get a player with the current score
 app.get('/api/players/:id', (request, response) => {
     const text = `
     SELECT result2.id, result2.username, result2.password, result2.email, team.name as teamname, result2.totalneststaken
@@ -232,7 +232,7 @@ app.post('/api/players', (request, response) => {
     }
 })
 
-// Delete player
+// Delete a player
 app.delete('/api/players/:id', (request, response) => {
     const text = `
         DELETE FROM player 
@@ -315,7 +315,7 @@ app.post('/api/playertimestampnests', (request, response) => {
     })
 })
 
-// Get timestamp
+// Get the timestamps
 app.get('/api/playertimestampnests', (request, response) => {
     const text = `
     SELECT *
@@ -332,7 +332,7 @@ app.get('/api/playertimestampnests', (request, response) => {
     })
 })
 
-// Get timestamp
+// Get the latest timestamp
 app.get('/api/playertimestampnests/latest', (request, response) => {
     const text = `
     SELECT timestamp
@@ -350,7 +350,7 @@ app.get('/api/playertimestampnests/latest', (request, response) => {
     })
 })
 
-// Get snatch history
+// Get the snatch history
 app.get('/api/snatchhistory', (request, response) => {
     const text = `
     SELECT username, nest.name as nestname, timestamp, team.name as teamname
